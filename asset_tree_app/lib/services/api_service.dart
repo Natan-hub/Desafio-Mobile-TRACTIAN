@@ -1,0 +1,1 @@
+//Lida com as chamadas de API

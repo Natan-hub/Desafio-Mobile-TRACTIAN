@@ -1,0 +1,1 @@
+//Aqui representa o modelo de dados de um ativo
