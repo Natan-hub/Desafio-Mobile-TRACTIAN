@@ -45,4 +45,22 @@ class ApiService {
       throw Exception('Failed to load locations');
     }
   }
+
+    // Método para buscar tanto ativos quanto localizações
+  Future<Map<String, dynamic>> fetchAssetsAndLocations(String companyId) async {
+    final assetsResponse = await http.get(Uri.parse('${BaseUrl.url}/companies/$companyId/assets'));
+    final locationsResponse = await http.get(Uri.parse('${BaseUrl.url}/companies/$companyId/locations'));
+
+    if (assetsResponse.statusCode == 200 && locationsResponse.statusCode == 200) {
+      List<dynamic> assetsJson = json.decode(assetsResponse.body);
+      List<dynamic> locationsJson = json.decode(locationsResponse.body);
+
+      return {
+        'assets': assetsJson.map((json) => Asset.fromJson(json)).toList(),
+        'locations': locationsJson.map((json) => Location.fromJson(json)).toList(),
+      };
+    } else {
+      throw Exception('Failed to load assets or locations');
+    }
+  }
 }

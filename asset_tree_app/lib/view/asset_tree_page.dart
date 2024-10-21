@@ -16,9 +16,10 @@ class AssetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final assetViewModel = Provider.of<AssetViewModel>(context);
 
-    if (assetViewModel.assets.isEmpty) {
-      assetViewModel.loadAssets(companyId);
-    }
+    // Usar addPostFrameCallback para garantir que notifyListeners() seja chamado depois do build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      assetViewModel.loadNodes(companyId);
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +29,7 @@ class AssetPage extends StatelessWidget {
       ),
       body: Consumer<AssetViewModel>(
         builder: (context, assetViewModel, child) {
-          if (assetViewModel.assets.isEmpty) {
+          if (assetViewModel.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -39,6 +40,13 @@ class AssetPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      assetViewModel.search(value);
+                    } else {
+                      assetViewModel.clearFilters();
+                    }
+                  },
                   decoration: InputDecoration(
                     hintText: 'Buscar Ativo ou Local',
                     prefixIcon: const Icon(Icons.search),
@@ -50,32 +58,43 @@ class AssetPage extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  children: [
-                    FilterChip(
-                      avatar: const Icon(Icons.energy_savings_leaf_outlined),
-                      label: const Text('Sensor de Energia'),
-                      onSelected: (bool selected) {
-                        if (selected) {
-                          assetViewModel.filterBySensorType('energy');
-                        } else {
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      FilterChip(
+                        avatar: const Icon(Icons.clear_rounded),
+                        label: const Text('Limpar'),
+                        onSelected: (bool selected) {
                           assetViewModel.clearFilters();
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 10),
-                    FilterChip(
-                      avatar: const Icon(Icons.error_outline_rounded),
-                      label: const Text('Crítico'),
-                      onSelected: (bool selected) {
-                        if (selected) {
-                          assetViewModel.filterByStatus('alert');
-                        } else {
-                          assetViewModel.clearFilters();
-                        }
-                      },
-                    ),
-                  ],
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      FilterChip(
+                        avatar: const Icon(Icons.energy_savings_leaf_outlined),
+                        label: const Text('Sensor de Energia'),
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            assetViewModel.filterBySensorType('energy');
+                          } else {
+                            assetViewModel.clearFilters();
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      FilterChip(
+                        avatar: const Icon(Icons.error_outline_rounded),
+                        label: const Text('Crítico'),
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            assetViewModel.filterBySensorType('alert');
+                          } else {
+                            assetViewModel.clearFilters();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const Divider(
@@ -83,7 +102,7 @@ class AssetPage extends StatelessWidget {
                 height: 20,
               ),
               Expanded(
-                child: AssetTree(assets: assetViewModel.filteredAssets),
+                child: AssetTree(nodes: assetViewModel.nodes),
               ),
             ],
           );
