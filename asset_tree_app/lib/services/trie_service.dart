@@ -1,6 +1,5 @@
 //Implementação da Trie para busca
 
-// lib/services/trie_service.dart
 import 'package:asset_tree_app/models/asset.dart';
 
 class TrieNode {
@@ -25,7 +24,7 @@ class Trie {
     }
 
     node.isEndOfWord = true;
-    node.asset = asset; // Associa o ativo ao nó final
+    node.asset = asset;
   }
 
   // Busca ativos por um prefixo

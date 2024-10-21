@@ -1,10 +1,5 @@
-//Widget que renderiza a arvore de ativos
-
-// lib/view/widgets/asset_tree.dart
 import 'package:asset_tree_app/models/tree_node.dart';
 import 'package:flutter/material.dart';
-
-// lib/view/widgets/asset_tree.dart
 
 class AssetTree extends StatelessWidget {
   final List<TreeNode> nodes;
@@ -42,7 +37,7 @@ class AssetTree extends StatelessWidget {
         if (node.sensorType == 'energy') {
           return const Icon(Icons.electric_bolt, color: Colors.green);
         } else if (node.sensorType == 'vibration') {
-          return const Icon(Icons.vibration, color: Colors.blue);
+          return const Icon(Icons.vibration, color: Colors.red);
         } else {
           return const Icon(Icons.extension, color: Colors.grey);
         }

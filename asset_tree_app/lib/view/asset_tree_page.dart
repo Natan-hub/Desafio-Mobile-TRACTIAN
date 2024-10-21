@@ -29,7 +29,7 @@ class AssetPage extends StatelessWidget {
       ),
       body: Consumer<AssetViewModel>(
         builder: (context, assetViewModel, child) {
-          if (assetViewModel.isLoading) {
+          if (assetViewModel.nodes.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -102,8 +102,15 @@ class AssetPage extends StatelessWidget {
                 height: 20,
               ),
               Expanded(
-                child: AssetTree(nodes: assetViewModel.nodes),
-              ),
+                child: Consumer<AssetViewModel>(
+                  builder: (context, assetViewModel, child) {
+                    if (assetViewModel.nodes.isEmpty) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return AssetTree(nodes: assetViewModel.nodes);
+                  },
+                ),
+              )
             ],
           );
         },
