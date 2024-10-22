@@ -7,10 +7,20 @@ import 'package:asset_tree_app/viewmodel/asset_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AssetPage extends StatelessWidget {
+class AssetPage extends StatefulWidget {
   final String companyId;
 
   const AssetPage({super.key, required this.companyId});
+
+  @override
+  State<AssetPage> createState() => _AssetPageState();
+}
+
+class _AssetPageState extends State<AssetPage> {
+  bool isEnergySelected =
+      false; // Controla o estado de seleção do chip "Sensor de Energia"
+  bool isCriticalSelected =
+      false; // Controla o estado de seleção do chip "Crítico"
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +28,7 @@ class AssetPage extends StatelessWidget {
 
     // Usar addPostFrameCallback para garantir que notifyListeners() seja chamado depois do build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      assetViewModel.loadNodes(companyId);
+      assetViewModel.loadNodes(widget.companyId);
     });
 
     return Scaffold(
@@ -67,30 +77,62 @@ class AssetPage extends StatelessWidget {
                         label: const Text('Limpar'),
                         onSelected: (bool selected) {
                           assetViewModel.clearFilters();
+                          setState(() {
+                            isCriticalSelected = false;
+                            isEnergySelected = false;
+                          });
                         },
                       ),
                       const SizedBox(width: 10),
                       FilterChip(
                         avatar: const Icon(Icons.energy_savings_leaf_outlined),
-                        label: const Text('Sensor de Energia'),
+                        label: Text(
+                          'Sensor de Energia',
+                          style: TextStyle(
+                            color:
+                                isEnergySelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        selected:
+                            isEnergySelected, // Define se o chip está selecionado
+                        selectedColor: azulPadrao, // Cor quando selecionado
                         onSelected: (bool selected) {
-                          if (selected) {
-                            assetViewModel.filterBySensorType('energy');
-                          } else {
-                            assetViewModel.clearFilters();
-                          }
+                          setState(() {
+                            isEnergySelected =
+                                selected; // Altera o estado de seleção
+                            if (selected) {
+                              assetViewModel.filterBySensorType('energy');
+                            } else {
+                              assetViewModel.clearFilters();
+                            }
+                          });
                         },
                       ),
                       const SizedBox(width: 10),
                       FilterChip(
                         avatar: const Icon(Icons.error_outline_rounded),
-                        label: const Text('Crítico'),
+                        label: Text(
+                          'Crítico',
+                          style: TextStyle(
+                            color: isCriticalSelected
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
+                        selected:
+                            isCriticalSelected, // Define se o chip está selecionado
+                        selectedColor: azulPadrao, // Cor quando selecionado
+
                         onSelected: (bool selected) {
-                          if (selected) {
-                            assetViewModel.filterBySensorType('alert');
-                          } else {
-                            assetViewModel.clearFilters();
-                          }
+                          setState(() {
+                            isCriticalSelected =
+                                selected; // Altera o estado de seleção
+                            if (selected) {
+                              assetViewModel.filterBySensorType('alert');
+                            } else {
+                              assetViewModel.clearFilters();
+                            }
+                          });
                         },
                       ),
                     ],

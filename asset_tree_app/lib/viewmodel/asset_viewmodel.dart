@@ -15,6 +15,7 @@ class AssetViewModel extends ChangeNotifier {
   List<TreeNode> get nodes =>
       _filteredNodes.isNotEmpty ? _filteredNodes : _nodes;
 
+  // Carrega ativos e locais separadamente
   Future<void> loadNodes(String companyId) async {
     if (_loadedCompanyId == companyId) return;
 
@@ -22,27 +23,32 @@ class AssetViewModel extends ChangeNotifier {
     _filteredNodes.clear();
 
     try {
-      final data = await apiService.fetchAssetsAndLocations(companyId);
-      List<Asset> assets = data['assets'];
-      List<Location> locations = data['locations'];
+      List<Asset> assets =
+          await apiService.fetchAssets(companyId); // Busca ativos
+      List<Location> locations =
+          await apiService.fetchLocations(companyId); // Busca localizações
 
-      _nodes = _buildHierarchy(assets, locations);
+      _nodes = _buildHierarchy(assets, locations); // Constrói a hierarquia
       _loadedCompanyId = companyId;
       notifyListeners();
     } catch (e) {
-      print('Erro ao carregar ativos: $e');
+      print('Erro ao carregar ativos e localizações: $e');
     }
   }
 
+  // Constrói a hierarquia combinando ativos e locais
   List<TreeNode> _buildHierarchy(List<Asset> assets, List<Location> locations) {
     Map<String, TreeNode> nodeMap = {};
+
     for (var location in locations) {
       nodeMap[location.id] = TreeNode.fromLocation(location);
     }
+
     for (var asset in assets) {
       nodeMap[asset.id] = TreeNode.fromAsset(asset);
     }
 
+    // Constrói a relação de hierarquia (associando pais e filhos)
     for (var node in nodeMap.values) {
       if (node.parentId != null && nodeMap.containsKey(node.parentId)) {
         nodeMap[node.parentId]!.children.add(node);
@@ -52,6 +58,7 @@ class AssetViewModel extends ChangeNotifier {
     return nodeMap.values.where((node) => node.parentId == null).toList();
   }
 
+  // Filtros e outras funções permanecem os mesmos
   void filterBySensorType(String sensorType) {
     _filteredNodes = _nodes
         .where((node) =>
